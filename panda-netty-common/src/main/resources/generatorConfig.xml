@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+	<classPathEntry location="C:\work_soft\maven_jar\respository\mysql\mysql-connector-java\5.1.28\mysql-connector-java-5.1.28.jar" />
+	<context id="context1">
+	 	<plugin type="com.iweb.panda.util.mybatis.MapperExtGenerateplugin" />   
+	 	<plugin type="com.iweb.panda.util.mybatis.PageHelperPlugin" />   
+	 
+		<commentGenerator>
+			  <property name="suppressAllComments" value="true"/>  
+		</commentGenerator>
+		<!--数据库链接URL，用户名、密码 -->
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://localhost:3306/panda" userId="root"
+			password="123456">
+		</jdbcConnection>
+		<!-- 生成模型的包名和位置 -->
+		<javaModelGenerator targetPackage="com.iweb.panda.entity"
+			targetProject="src/main/java">
+			<property name="enableSubPackages" value="true" />
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<!-- 生成映射文件的包名和位置 -->
+		<sqlMapGenerator targetPackage="com.iweb.panda.mapper.xml"
+			targetProject="src/main/java">
+			<property name="enableSubPackages" value="true" />
+		</sqlMapGenerator>
+
+		<!-- 生成DAO的包名和位置 -->
+		<javaClientGenerator targetPackage="com.iweb.panda.mapper"
+			targetProject="src/main/java" type="XMLMAPPER">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+		<!-- 要生成哪些表 -->
+		<table tableName="student"  domainObjectName="Student" enableUpdateByExample="false"  enableDeleteByExample="false" >
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+     		<columnOverride  column="name" property="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+     		<columnOverride  column="sex" property="sex" javaType="java.lang.Integer" jdbcType="TINYINT"/>
+     		<columnOverride  column="create_time" property="createTime" javaType="java.util.Date"/>
+     	</table> 
+     	<table tableName="course"  domainObjectName="Course" enableUpdateByExample="false"  enableDeleteByExample="false" >
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>           
+     		<columnOverride  column="name" property="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+     		<columnOverride  column="create_time" property="createTime" javaType="java.util.Date"/>
+     	</table> 
+     	<table tableName="student_course"  domainObjectName="StudentCourse" enableUpdateByExample="false"  enableDeleteByExample="false" >
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>         
+     		<columnOverride  column="student_id" property="studentId" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+     		<columnOverride  column="course_id" property="courseId" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+     		<columnOverride  column="create_time" property="createTime" javaType="java.util.Date"/>
+     	</table> 
+	</context>
+</generatorConfiguration>
