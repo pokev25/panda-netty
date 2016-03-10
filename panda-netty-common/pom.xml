@@ -8,6 +8,7 @@
 		<artifactId>panda-netty</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+	<packaging>jar</packaging>
 	<artifactId>panda-netty-common</artifactId>
 	<name>${project.artifactId}}</name>
 
@@ -173,4 +174,22 @@
 			<version>${cglib.version}</version>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>${maven.shade.plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
