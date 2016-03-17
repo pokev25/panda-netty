@@ -20,122 +20,139 @@ import com.panda.netty.common.util.JsonUtil;
 
 @SuppressWarnings("rawtypes")
 public class Message<T> extends Header {
-	private static final Logger logger = LoggerFactory.getLogger(Message.class);
-	// 消息注册
-	private static final Map<Integer, Class> commandClassesMap = new HashMap<Integer, Class>();
-	private static final Map<Class, Integer> classedCommandMap = new HashMap<Class, Integer>();
-	public static final int HEAD_LENGTH = 50;
 
-	static {
-		// 登录
-		commandClassesMap.put(CommandEnum.LOGIN.getKey(), LoginMessage.class);
-		classedCommandMap.put(LoginMessage.class, CommandEnum.LOGIN.getKey());
-		// 退出
-		commandClassesMap.put(CommandEnum.QUIT.getKey(), QuitMessage.class);
-		classedCommandMap.put(QuitMessage.class, CommandEnum.QUIT.getKey());
-	}
+    private static final Logger              logger            = LoggerFactory.getLogger(Message.class);
+    // 消息注册
+    private static final Map<Integer, Class> commandClassesMap = new HashMap<Integer, Class>();
+    private static final Map<Class, Integer> classedCommandMap = new HashMap<Class, Integer>();
+    public static final int                  HEAD_LENGTH       = 50;
 
-	// 消息体
-	private T body;
+    static {
+        // 登录
+        commandClassesMap.put(CommandEnum.LOGIN.getKey(), LoginMessage.class);
+        classedCommandMap.put(LoginMessage.class, CommandEnum.LOGIN.getKey());
+        // 退出
+        commandClassesMap.put(CommandEnum.QUIT.getKey(), QuitMessage.class);
+        classedCommandMap.put(QuitMessage.class, CommandEnum.QUIT.getKey());
+    }
 
-	public Message() {
-		super();
-	}
+    // 消息体
+    private T body;
 
-	public Message(short version, int command, String messageId) {
-		super(version, command, messageId);
-	}
+    public Message(){
+        super();
+    }
 
-	public Message(int length, short version, int command, String messageId, Date createTime) {
-		super(length, version, command, messageId, createTime);
-	}
+    public Message(short version, int command, String messageId){
+        super(version, command, messageId);
+    }
 
-	public Message(String messageId, T body) {
-		super((short) 1, classedCommandMap.get(body.getClass()), messageId);
-		this.body = body;
-	}
+    public Message(int length, short version, int command, String messageId, Date createTime){
+        super(length, version, command, messageId, createTime);
+    }
 
-	public byte[] encodeBody() {
-		// 序列化方式可以选择 json protobuf
-		// json
-		// byte[] bs = JsonUtil.toJsonString(this.body).getBytes();
+    public Message(String messageId, T body){
+        super((short) 1, classedCommandMap.get(body.getClass()), messageId);
+        this.body = body;
+    }
 
-		// hessian
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		HessianFactory factory = new HessianFactory();
-		Hessian2Output out = factory.createHessian2Output(bos);
-		try {
-			out.startMessage();
-			out.writeObject(this.body);
-			out.completeMessage();
-			out.close();
-		} catch (IOException e) {
-			logger.error("消息编码失败", e);
-		}
-		byte[] bs = bos.toByteArray();
-		setLength(HEAD_LENGTH + bs.length);
-		return bs;
-	}
+    public byte[] encodeBody() {
+        // 序列化方式可以选择 json protobuf
+        // json
+        // byte[] bs = _encodeByJson(this.body);
+        // hessian
+        byte[] bs = _encodeByHessian2(this.body);
+        setLength(HEAD_LENGTH + bs.length);
+        return bs;
+    }
 
-	@SuppressWarnings("unchecked")
-	public void decodeBody(byte[] bs) {
-		String bodyStr = new String(bs);
-		logger.info("消息体内容:{}", bodyStr);
-		// json
-		// this.body = (T) JsonUtil.parseObject(bodyStr,
-		// commandClassesMap.get(getCommand()));
+    @SuppressWarnings("unused")
+    private byte[] _encodeByJson(Object obj) {
+        return JsonUtil.toJsonString(obj).getBytes();
+    }
 
-		// hessian
-		ByteArrayInputStream bis = new ByteArrayInputStream(bs);
-		HessianFactory factory = new HessianFactory();
-		Hessian2Input in = factory.createHessian2Input(bis);
-		try {
-			in.startMessage();
-			this.body = (T) in.readObject();
-			in.completeMessage();
-			in.close();
-			bis.close();
-		} catch (IOException e) {
-			logger.error("消息解码失败", e);
-		}
-	}
+    private byte[] _encodeByHessian2(Object obj) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        HessianFactory factory = new HessianFactory();
+        Hessian2Output out = factory.createHessian2Output(bos);
+        try {
+            out.startMessage();
+            out.writeObject(obj);
+            out.completeMessage();
+            out.close();
+        } catch (IOException e) {
+            logger.error("消息编码失败", e);
+        }
+        return bos.toByteArray();
+    }
 
-	public T getBody() {
-		return body;
-	}
+    @SuppressWarnings("unchecked")
+    public void decodeBody(byte[] bs) {
+        // json
+        // this.body = (T) _decodeByJson(bs);
+        // hessian
+        this.body = (T) _decodeByHessian2(bs);
+        logger.info("消息体内容:{}", JsonUtil.toJsonString(this.body));
+    }
 
-	public void setBody(T body) {
-		this.body = body;
-	}
+    @SuppressWarnings({ "unchecked", "unused" })
+    private Object _decodeByJson(byte[] bs) {
+        return JsonUtil.parseObject(new String(bs), commandClassesMap.get(getCommand()));
+    }
 
-	public static void main(String[] args) {
-		LoginMessage message = new LoginMessage();
-		message.setUserId("1");
-		message.setUserName("小明");
+    private Object _decodeByHessian2(byte[] bs) {
+        Object obj = null;
+        ByteArrayInputStream bis = new ByteArrayInputStream(bs);
+        HessianFactory factory = new HessianFactory();
+        Hessian2Input in = factory.createHessian2Input(bis);
+        try {
+            in.startMessage();
+            obj = in.readObject();
+            in.completeMessage();
+            in.close();
+            bis.close();
+        } catch (IOException e) {
+            logger.error("消息解码失败", e);
+        }
+        return obj;
+    }
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		HessianFactory factory = new HessianFactory();
-		Hessian2Output out = factory.createHessian2Output(bos);
-		try {
-			out.startMessage();
-			out.writeObject(message);
-			out.completeMessage();
-			out.close();
-		} catch (IOException e) {
-			logger.error("消息编码失败", e);
-		}
-		byte[] bs = bos.toByteArray();
+    public T getBody() {
+        return body;
+    }
 
-		ByteArrayInputStream bis = new ByteArrayInputStream(bs);
-		Hessian2Input in = factory.createHessian2Input(bis);
-		try {
-			in.startMessage();
-			System.out.println(JsonUtil.toJsonString(in.readObject()));
-			in.completeMessage();
-			in.close();
-			bis.close();
-		} catch (IOException e) {
-			logger.error("消息解码失败", e);
-		}
-	}
+    public void setBody(T body) {
+        this.body = body;
+    }
+
+    public static void main(String[] args) {
+        LoginMessage message = new LoginMessage();
+        message.setUserId("1");
+        message.setUserName("小明");
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        HessianFactory factory = new HessianFactory();
+        Hessian2Output out = factory.createHessian2Output(bos);
+        try {
+            out.startMessage();
+            out.writeObject(message);
+            out.completeMessage();
+            out.close();
+        } catch (IOException e) {
+            logger.error("消息编码失败", e);
+        }
+        byte[] bs = bos.toByteArray();
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(bs);
+        Hessian2Input in = factory.createHessian2Input(bis);
+        try {
+            in.startMessage();
+            System.out.println(JsonUtil.toJsonString(in.readObject()));
+            in.completeMessage();
+            in.close();
+            bis.close();
+        } catch (IOException e) {
+            logger.error("消息解码失败", e);
+        }
+    }
 }
