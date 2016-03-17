@@ -18,6 +18,7 @@ import com.panda.netty.common.util.StringUtil;
 import com.panda.netty.common.util.UUIDUtil;
 import com.panda.netty.server.channel.ChannelManager;
 import com.panda.netty.server.handler.HeaderDecoder;
+import com.panda.netty.server.handler.HeaderEncoder;
 import com.panda.netty.server.handler.NettyServerHandler;
 
 /**
@@ -47,7 +48,7 @@ public class DefaultServer extends Thread {
 		serverBootstrap.group(bossGroup, workGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
 			@Override
 			protected void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(new HeaderDecoder()).addLast(handler);
+				ch.pipeline().addLast(new HeaderDecoder()).addLast(new HeaderEncoder()).addLast(handler);
 			}
 		}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
 	}

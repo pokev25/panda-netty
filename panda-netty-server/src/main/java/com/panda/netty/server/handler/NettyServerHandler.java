@@ -8,11 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.panda.netty.common.entity.ClientUser;
-import com.panda.netty.common.message.LoginMessage;
 import com.panda.netty.common.message.Message;
+import com.panda.netty.common.message.req.LoginMessage;
 import com.panda.netty.common.util.CtxUtil;
 import com.panda.netty.server.channel.ChannelManager;
-
 
 @Sharable
 public class NettyServerHandler extends ChannelHandlerAdapter {
@@ -33,6 +32,7 @@ public class NettyServerHandler extends ChannelHandlerAdapter {
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		// 客户端与服务端断开连接
 		logger.info("server channelInactive-->clientId:{}", CtxUtil.getClientId(ctx));
+		channelManager.removeChannel(ctx);
 	}
 
 	@Override

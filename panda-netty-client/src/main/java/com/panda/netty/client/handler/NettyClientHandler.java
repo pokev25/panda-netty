@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.panda.netty.common.message.Message;
 import com.panda.netty.common.util.CtxUtil;
 
 @Sharable
@@ -31,7 +32,16 @@ public class NettyClientHandler extends ChannelHandlerAdapter {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		super.channelRead(ctx, msg);
+		// 客户端接收服务端数据
+		Message<Object> message = (Message<Object>) msg;
+		Object messageBody = message.getBody();
+		// if (messageBody instanceof LoginMessage) {
+		// LoginMessage ms = (LoginMessage) messageBody;
+		// ClientUser client = new ClientUser(ms.getUserId(), ms.getUserName(),
+		// "");
+		// channelManager.addChannelContext(ctx, client);
+		// }
+		logger.info("server channel read->messageId:{}", message.getMessageId());
 	}
 
 	@Override

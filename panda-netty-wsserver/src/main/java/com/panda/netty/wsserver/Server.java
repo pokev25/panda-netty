@@ -1,7 +1,7 @@
-package com.panda.netty.server;
+package com.panda.netty.wsserver;
 
 import com.panda.netty.common.message.Message;
-import com.panda.netty.server.common.DefaultServer;
+import com.panda.netty.wsserver.common.DefaultWsServer;
 
 /**
  * 
@@ -9,10 +9,10 @@ import com.panda.netty.server.common.DefaultServer;
  * @Date 2016年3月5日 下午6:27:16
  */
 public class Server {
-	private DefaultServer defaultServer;
+	private DefaultWsServer defaultServer;
 
 	public Server(String serverName, int serverPort) {
-		defaultServer = new DefaultServer(serverName, serverPort);
+		defaultServer = new DefaultWsServer(serverName, serverPort);
 	}
 
 	public void start() {
@@ -28,7 +28,7 @@ public class Server {
 	}
 
 	public static void main(String[] args) {
-		Server server = new Server("socket服务", 9100);
+		Server server = new Server("WebSocket服务", 9200);
 		server.start();
 	}
 }

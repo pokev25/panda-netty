@@ -25,6 +25,7 @@
 		<mybatis.generator.core.version>1.3.2</mybatis.generator.core.version>
 		<commons.lang3.version>3.4</commons.lang3.version>
 		<cglib.version>2.2.2</cglib.version>
+		<hessian.version>4.0.38</hessian.version>
 	</properties>
 
 	<dependencies>
@@ -172,6 +173,11 @@
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
 			<version>${cglib.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.caucho</groupId>
+			<artifactId>hessian</artifactId>
+			<version>${hessian.version}</version>
 		</dependency>
 	</dependencies>
 

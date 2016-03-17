@@ -1,6 +1,9 @@
-package com.panda.netty.common.message;
+package com.panda.netty.common.message.req;
 
-public class LoginMessage {
+import java.io.Serializable;
+
+public class LoginMessage implements Serializable {
+	private static final long serialVersionUID = 3443904597922808701L;
 	private String userId;
 	private String userName;
 

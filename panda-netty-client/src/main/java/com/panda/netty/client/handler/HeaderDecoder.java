@@ -1,4 +1,4 @@
-package com.panda.netty.server.handler;
+package com.panda.netty.client.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

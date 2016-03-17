@@ -13,6 +13,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.panda.netty.client.handler.HeaderDecoder;
 import com.panda.netty.client.handler.HeaderEncoder;
 import com.panda.netty.client.handler.NettyClientHandler;
 import com.panda.netty.common.message.Message;
@@ -40,7 +41,7 @@ public class DefaultClient {
 		bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 			@Override
 			public void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(new HeaderEncoder()).addLast(handler);
+				ch.pipeline().addLast(new HeaderEncoder()).addLast(new HeaderDecoder()).addLast(handler);
 			}
 		});
 	}

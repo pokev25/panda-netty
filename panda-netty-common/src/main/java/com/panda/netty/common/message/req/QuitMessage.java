@@ -1,4 +1,4 @@
-package com.panda.netty.common.message;
+package com.panda.netty.common.message.req;
 
 public class QuitMessage {
 	private String userId;
