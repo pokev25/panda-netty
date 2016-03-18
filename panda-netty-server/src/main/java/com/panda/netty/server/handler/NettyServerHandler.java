@@ -1,8 +1,11 @@
 package com.panda.netty.server.handler;
 
+import java.util.concurrent.TimeUnit;
+
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,5 +64,9 @@ public class NettyServerHandler extends ChannelHandlerAdapter {
 		// ctx抛出异常
 		logger.info("server exceptionCaught-->clientId:" + CtxUtil.getClientId(ctx), cause);
 		ctx.close();
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(TimeUnit.MILLISECONDS.toNanos(1l));
 	}
 }
