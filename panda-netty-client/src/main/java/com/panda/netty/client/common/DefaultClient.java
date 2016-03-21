@@ -3,12 +3,15 @@ package com.panda.netty.client.common;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,7 @@ public class DefaultClient {
     private String              serverHost         = "127.0.0.1";
     private int                 serverPort         = 9100;
     private NettyClientHandler  handler;
-    private int                 reloginWaitSeconds = 1;                                           // 重连等待时间(默认隔1秒重连一次)
+    private int                 reloginWaitSeconds = 5;                                           // 重连等待时间(默认隔1秒重连一次)
 
     private EventLoopGroup      workGroup;
     private Bootstrap           bootstrap;
@@ -38,7 +41,7 @@ public class DefaultClient {
         bootstrap = new Bootstrap();
         bootstrap.group(workGroup);
         bootstrap.channel(NioSocketChannel.class);
-        bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+        bootstrap.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 
             @Override
@@ -50,13 +53,19 @@ public class DefaultClient {
 
     public void connect() {
         ChannelFuture channelFuture = null;
-        try {
-            channelFuture = bootstrap.connect(serverHost, serverPort).sync();
-            channel = channelFuture.channel();
-            logger.info("client connect-->host:{},port:{}", serverHost, serverPort);
-        } catch (InterruptedException e) {
-            logger.error("client connect failed", e);
-        }
+        channelFuture = bootstrap.connect(serverHost, serverPort).addListener(new ChannelFutureListener() {
+
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (!future.isSuccess()) {
+                    logger.warn("client connect failed");
+                    future.channel().close();
+                }
+            }
+        });
+        channel = channelFuture.channel();
+        logger.info("client connect-->host:{},port:{}", serverHost, serverPort);
+
     }
 
     /**
@@ -74,7 +83,7 @@ public class DefaultClient {
         }
         while (!channel.isActive()) {
             try {
-                Thread.sleep(reloginWaitSeconds);
+                Thread.sleep(reloginWaitSeconds * 1000);
             } catch (InterruptedException e) {
                 logger.error("client reconnect failed", e);
                 break;

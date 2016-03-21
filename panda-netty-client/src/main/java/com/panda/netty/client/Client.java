@@ -6,77 +6,79 @@ import com.panda.netty.common.message.req.LoginMessage;
 import com.panda.netty.common.util.UUIDUtil;
 
 public class Client {
-	private DefaultClient defaultClient;
 
-	public Client(String serverHost, int serverPort) {
-		defaultClient = new DefaultClient(serverHost, serverPort);
-	}
+    private DefaultClient defaultClient;
 
-	public void connect() {
-		defaultClient.connect();
-	}
+    public Client(String serverHost, int serverPort){
+        defaultClient = new DefaultClient(serverHost, serverPort);
+    }
 
-	@SuppressWarnings("rawtypes")
-	public void sendMessage(Message message) {
-		defaultClient.sendMessage(message);
-	}
+    public void connect() {
+        defaultClient.connect();
+    }
 
-	public void close() {
-		defaultClient.close();
-	}
+    @SuppressWarnings("rawtypes")
+    public void sendMessage(Message message) {
+        defaultClient.sendMessage(message);
+    }
 
-	public static void main(String[] args) {
-		Client client = new Client("127.0.0.1", 9100);
-		client.connect();
-		LoginMessage lmBody = new LoginMessage();
-		lmBody.setUserId("456");
-		lmBody.setUserName("小红");
-		Message<LoginMessage> msLoginMessage = new Message<LoginMessage>(UUIDUtil.create(), lmBody);
-		msLoginMessage.encodeBody();
+    public void close() {
+        defaultClient.close();
+    }
 
-		// Client client2 = new Client("127.0.0.1", 9100);
-		// client2.connect();
-		// LoginMessage lmBody2 = new LoginMessage();
-		// lmBody2.setUserId("456");
-		// lmBody2.setUserName("小红");
-		// Message<LoginMessage> msLoginMessage2 = new
-		// Message<LoginMessage>(UUIDUtil.create(), lmBody2);
-		// msLoginMessage2.encodeBody();
+    public static void main(String[] args) {
+        Client client = new Client("192.168.1.107", 9100);
+        client.connect();
+        LoginMessage lmBody = new LoginMessage();
+        lmBody.setUserId("123");
+        lmBody.setUserName("小明");
+        Message<LoginMessage> msLoginMessage = new Message<LoginMessage>(UUIDUtil.create(), lmBody);
+        msLoginMessage.encodeBody();
 
-		Runnable r1 = new Runnable() {
-			@Override
-			public void run() {
-				// while (true) {
-				for (int i = 0; i < 100; i++) {
-					if (i < 5) {
-						client.sendMessage(msLoginMessage);
-					}
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-					}
-				}
-				// }
-			}
-		};
+        // Client client2 = new Client("127.0.0.1", 9100);
+        // client2.connect();
+        // LoginMessage lmBody2 = new LoginMessage();
+        // lmBody2.setUserId("456");
+        // lmBody2.setUserName("小红");
+        // Message<LoginMessage> msLoginMessage2 = new
+        // Message<LoginMessage>(UUIDUtil.create(), lmBody2);
+        // msLoginMessage2.encodeBody();
 
-		// Runnable r2 = new Runnable() {
-		// @Override
-		// public void run() {
-		// while (true) {
-		// client2.sendMessage(msLoginMessage2);
-		// try {
-		// Thread.sleep(5000);
-		// } catch (InterruptedException e) {
-		// }
-		// }
-		// }
-		// };
+        Runnable r1 = new Runnable() {
 
-		Thread t1 = new Thread(r1);
-		// Thread t2 = new Thread(r2);
-		t1.start();
-		// t2.start();
+            @Override
+            public void run() {
+                while (true) {
+                    // for (int i = 0; i < 100; i++) {
+                    // if (i < 5) {
+                    client.sendMessage(msLoginMessage);
+                    // }
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                    }
+                    // }
+                }
+            }
+        };
 
-	}
+        // Runnable r2 = new Runnable() {
+        // @Override
+        // public void run() {
+        // while (true) {
+        // client2.sendMessage(msLoginMessage2);
+        // try {
+        // Thread.sleep(5000);
+        // } catch (InterruptedException e) {
+        // }
+        // }
+        // }
+        // };
+
+        Thread t1 = new Thread(r1);
+        // Thread t2 = new Thread(r2);
+        t1.start();
+        // t2.start();
+
+    }
 }
