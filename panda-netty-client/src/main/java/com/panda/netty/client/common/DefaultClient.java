@@ -19,83 +19,85 @@ import com.panda.netty.client.handler.NettyClientHandler;
 import com.panda.netty.common.message.Message;
 
 public class DefaultClient {
-	private static final Logger logger = LoggerFactory.getLogger(DefaultClient.class);
-	private String serverHost = "127.0.0.1";
-	private int serverPort = 9100;
-	private NettyClientHandler handler;
-	private int reloginWaitSeconds = 1; // 重连等待时间(默认隔1秒重连一次)
 
-	private EventLoopGroup workGroup;
-	private Bootstrap bootstrap;
-	private Channel channel; // 客户端通信通道
+    private static final Logger logger             = LoggerFactory.getLogger(DefaultClient.class);
+    private String              serverHost         = "127.0.0.1";
+    private int                 serverPort         = 9100;
+    private NettyClientHandler  handler;
+    private int                 reloginWaitSeconds = 1;                                           // 重连等待时间(默认隔1秒重连一次)
 
-	public DefaultClient(String serverHost, int serverPort) {
-		this.serverHost = serverHost;
-		this.serverPort = serverPort;
-		handler = new NettyClientHandler();
-		workGroup = new NioEventLoopGroup();
-		bootstrap = new Bootstrap();
-		bootstrap.group(workGroup);
-		bootstrap.channel(NioSocketChannel.class);
-		bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-		bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-			@Override
-			public void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(new HeaderEncoder()).addLast(new HeaderDecoder()).addLast(handler);
-			}
-		});
-	}
+    private EventLoopGroup      workGroup;
+    private Bootstrap           bootstrap;
+    private Channel             channel;                                                          // 客户端通信通道
 
-	public void connect() {
-		ChannelFuture channelFuture = null;
-		try {
-			channelFuture = bootstrap.connect(serverHost, serverPort).sync();
-			channel = channelFuture.channel();
-			logger.info("client connect-->host:{},port:{}", serverHost, serverPort);
-		} catch (InterruptedException e) {
-			logger.error("client connect failed", e);
-		}
-	}
+    public DefaultClient(String serverHost, int serverPort){
+        this.serverHost = serverHost;
+        this.serverPort = serverPort;
+        handler = new NettyClientHandler(this);
+        workGroup = new NioEventLoopGroup();
+        bootstrap = new Bootstrap();
+        bootstrap.group(workGroup);
+        bootstrap.channel(NioSocketChannel.class);
+        bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 
-	/**
-	 * 重连
-	 * 
-	 * @author chenlj
-	 * @Date 2016 下午4:01:46
-	 */
-	public void reConnect() {
-		if (channel.isActive()) {
-			return;
-		}
-		if (reloginWaitSeconds < 0) {
-			return;
-		}
-		while (!channel.isActive()) {
-			try {
-				Thread.sleep(reloginWaitSeconds);
-			} catch (InterruptedException e) {
-				logger.error("client reconnect failed", e);
-				break;
-			}
-			connect();
-		}
-	}
+            @Override
+            public void initChannel(SocketChannel ch) throws Exception {
+                ch.pipeline().addLast(new HeaderEncoder()).addLast(new HeaderDecoder()).addLast(handler);
+            }
+        });
+    }
 
-	@SuppressWarnings("rawtypes")
-	public void sendMessage(Message message) {
-		channel.writeAndFlush(message);
-	}
+    public void connect() {
+        ChannelFuture channelFuture = null;
+        try {
+            channelFuture = bootstrap.connect(serverHost, serverPort).sync();
+            channel = channelFuture.channel();
+            logger.info("client connect-->host:{},port:{}", serverHost, serverPort);
+        } catch (InterruptedException e) {
+            logger.error("client connect failed", e);
+        }
+    }
 
-	public void close() {
-		workGroup.shutdownGracefully();
-	}
+    /**
+     * 重连
+     * 
+     * @author chenlj
+     * @Date 2016 下午4:01:46
+     */
+    public void reConnect() {
+        if (channel.isActive()) {
+            return;
+        }
+        if (reloginWaitSeconds < 0) {
+            return;
+        }
+        while (!channel.isActive()) {
+            try {
+                Thread.sleep(reloginWaitSeconds);
+            } catch (InterruptedException e) {
+                logger.error("client reconnect failed", e);
+                break;
+            }
+            connect();
+        }
+    }
 
-	public int getReloginWaitSeconds() {
-		return reloginWaitSeconds;
-	}
+    @SuppressWarnings("rawtypes")
+    public void sendMessage(Message message) {
+        channel.writeAndFlush(message);
+    }
 
-	public void setReloginWaitSeconds(int reloginWaitSeconds) {
-		this.reloginWaitSeconds = reloginWaitSeconds;
-	}
+    public void close() {
+        workGroup.shutdownGracefully();
+    }
+
+    public int getReloginWaitSeconds() {
+        return reloginWaitSeconds;
+    }
+
+    public void setReloginWaitSeconds(int reloginWaitSeconds) {
+        this.reloginWaitSeconds = reloginWaitSeconds;
+    }
 
 }
