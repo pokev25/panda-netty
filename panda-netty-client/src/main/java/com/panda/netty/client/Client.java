@@ -29,8 +29,8 @@ public class Client {
 		Client client = new Client("127.0.0.1", 9100);
 		client.connect();
 		LoginMessage lmBody = new LoginMessage();
-		lmBody.setUserId("123");
-		lmBody.setUserName("小明");
+		lmBody.setUserId("456");
+		lmBody.setUserName("小红");
 		Message<LoginMessage> msLoginMessage = new Message<LoginMessage>(UUIDUtil.create(), lmBody);
 		msLoginMessage.encodeBody();
 
@@ -46,13 +46,17 @@ public class Client {
 		Runnable r1 = new Runnable() {
 			@Override
 			public void run() {
-				while (true) {
-					client.sendMessage(msLoginMessage);
+				// while (true) {
+				for (int i = 0; i < 100; i++) {
+					if (i < 5) {
+						client.sendMessage(msLoginMessage);
+					}
 					try {
 						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 					}
 				}
+				// }
 			}
 		};
 
