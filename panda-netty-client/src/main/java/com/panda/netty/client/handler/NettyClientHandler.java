@@ -3,6 +3,7 @@ package com.panda.netty.client.handler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,18 @@ public class NettyClientHandler extends ChannelHandlerAdapter {
         // channelManager.addChannelContext(ctx, client);
         // }
         logger.info("server channel read->messageId:{}", message.getMessageId());
+    }
+    
+    
+
+    @Override
+    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        logger.info("client disconnect -->clientId:{}", CtxUtil.getClientId(ctx));
+    }
+
+    @Override
+    public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        logger.info("client close -->clientId:{}", CtxUtil.getClientId(ctx));
     }
 
     @Override

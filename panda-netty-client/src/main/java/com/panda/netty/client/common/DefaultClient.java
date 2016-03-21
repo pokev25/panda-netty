@@ -1,5 +1,13 @@
 package com.panda.netty.client.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.panda.netty.client.handler.HeaderDecoder;
+import com.panda.netty.client.handler.HeaderEncoder;
+import com.panda.netty.client.handler.NettyClientHandler;
+import com.panda.netty.common.message.Message;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -10,16 +18,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import javax.sql.ConnectionEvent;
-import javax.sql.ConnectionEventListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.panda.netty.client.handler.HeaderDecoder;
-import com.panda.netty.client.handler.HeaderEncoder;
-import com.panda.netty.client.handler.NettyClientHandler;
-import com.panda.netty.common.message.Message;
 
 public class DefaultClient {
 
@@ -41,7 +39,7 @@ public class DefaultClient {
         bootstrap = new Bootstrap();
         bootstrap.group(workGroup);
         bootstrap.channel(NioSocketChannel.class);
-        bootstrap.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
+        bootstrap.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000).option(ChannelOption.TCP_NODELAY,true);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 
             @Override
