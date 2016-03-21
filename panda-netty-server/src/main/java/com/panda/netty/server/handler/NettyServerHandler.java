@@ -4,8 +4,6 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +17,8 @@ import com.panda.netty.server.channel.ChannelManager;
 public class NettyServerHandler extends ChannelHandlerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
 	private ChannelManager channelManager;
+
+	// 可以自定义一个handler interface对外暴露
 
 	public NettyServerHandler(ChannelManager channelManager) {
 		this.channelManager = channelManager;
@@ -63,9 +63,5 @@ public class NettyServerHandler extends ChannelHandlerAdapter {
 		// ctx抛出异常
 		logger.info("server exceptionCaught-->clientId:" + CtxUtil.getClientId(ctx), cause);
 		ctx.close();
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(TimeUnit.MILLISECONDS.toNanos(1l));
 	}
 }

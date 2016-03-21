@@ -18,12 +18,12 @@ import com.panda.netty.client.handler.HeaderEncoder;
 import com.panda.netty.client.handler.NettyClientHandler;
 import com.panda.netty.common.message.Message;
 
-
 public class DefaultClient {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultClient.class);
 	private String serverHost = "127.0.0.1";
 	private int serverPort = 9100;
 	private NettyClientHandler handler;
+	private int reloginWaitSeconds = 1; // 重连等待时间(默认隔1秒重连一次)
 
 	private EventLoopGroup workGroup;
 	private Bootstrap bootstrap;
@@ -57,6 +57,30 @@ public class DefaultClient {
 		}
 	}
 
+	/**
+	 * 重连
+	 * 
+	 * @author chenlj
+	 * @Date 2016 下午4:01:46
+	 */
+	public void reConnect() {
+		if (channel.isActive()) {
+			return;
+		}
+		if (reloginWaitSeconds < 0) {
+			return;
+		}
+		while (!channel.isActive()) {
+			try {
+				Thread.sleep(reloginWaitSeconds);
+			} catch (InterruptedException e) {
+				logger.error("client reconnect failed", e);
+				break;
+			}
+			connect();
+		}
+	}
+
 	@SuppressWarnings("rawtypes")
 	public void sendMessage(Message message) {
 		channel.writeAndFlush(message);
@@ -65,4 +89,13 @@ public class DefaultClient {
 	public void close() {
 		workGroup.shutdownGracefully();
 	}
+
+	public int getReloginWaitSeconds() {
+		return reloginWaitSeconds;
+	}
+
+	public void setReloginWaitSeconds(int reloginWaitSeconds) {
+		this.reloginWaitSeconds = reloginWaitSeconds;
+	}
+
 }
