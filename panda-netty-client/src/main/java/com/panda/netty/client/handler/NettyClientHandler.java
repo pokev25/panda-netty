@@ -52,8 +52,6 @@ public class NettyClientHandler extends ChannelHandlerAdapter {
         // }
         logger.info("server channel read->messageId:{}", message.getMessageId());
     }
-    
-    
 
     @Override
     public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
@@ -68,7 +66,7 @@ public class NettyClientHandler extends ChannelHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.info("client exceptionCaught -->clientId:" + CtxUtil.getClientId(ctx), cause);
-        ctx.close();
+        // ctx.close();
     }
 
 }
