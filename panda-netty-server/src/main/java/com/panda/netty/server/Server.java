@@ -16,6 +16,7 @@ public class Server {
 	}
 
 	public void start() {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> close()));
 		defaultServer.start();
 	}
 

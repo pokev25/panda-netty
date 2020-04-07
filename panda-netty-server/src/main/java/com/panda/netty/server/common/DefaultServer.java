@@ -1,14 +1,12 @@
 package com.panda.netty.server.common;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import org.slf4j.Logger;
@@ -24,6 +22,8 @@ import com.panda.netty.server.handler.HeaderEncoder;
 import com.panda.netty.server.handler.HeartBeatHandler;
 import com.panda.netty.server.handler.IpFilterFactory;
 import com.panda.netty.server.handler.NettyServerHandler;
+
+import java.net.Socket;
 
 /**
  * 
@@ -52,11 +52,12 @@ public class DefaultServer extends Thread {
 		bossGroup = new NioEventLoopGroup();
 		workGroup = new NioEventLoopGroup();
 		serverBootstrap = new ServerBootstrap();
-		serverBootstrap.group(bossGroup, workGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
+		serverBootstrap.group(bossGroup, workGroup).channel(NioServerSocketChannel.class)
+				.handler(new LoggingHandler(LogLevel.INFO))
+				.childHandler(new ChannelInitializer<SocketChannel>() {
 			@Override
-			protected void initChannel(SocketChannel ch) throws Exception {
-				ch.pipeline().addLast(IpFilterFactory.createRuleBasedIpFilter()).addLast(new IdleStateHandler(heartBeatTime, heartBeatTime, heartBeatTime))
-						.addLast(new HeartBeatHandler()).addLast(new HeaderDecoder()).addLast(new HeaderEncoder()).addLast(handler);
+			protected void initChannel(SocketChannel sc) throws Exception {
+				addPipeline(sc);
 			}
 		});
 		initOptionSet(serverBootstrap);
@@ -67,6 +68,17 @@ public class DefaultServer extends Thread {
 		serverBootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ServerConfig.CONNECT_TIMEOUT_MILLIS);
 		serverBootstrap.option(ChannelOption.SO_TIMEOUT, ServerConfig.SO_TIMEOUT);
 		serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, ServerConfig.SO_KEEPALIVE);
+	}
+
+	private void addPipeline(SocketChannel sc){
+		ChannelPipeline pipeline = sc.pipeline();
+		pipeline.addLast(new LoggingHandler(LogLevel.INFO))
+				.addLast(IpFilterFactory.createRuleBasedIpFilter())
+				.addLast(new IdleStateHandler(heartBeatTime, heartBeatTime, heartBeatTime))
+				.addLast(new HeartBeatHandler())
+				.addLast(new HeaderDecoder())
+				.addLast(new HeaderEncoder())
+				.addLast(handler);
 	}
 
 	@Override
@@ -84,6 +96,7 @@ public class DefaultServer extends Thread {
 	}
 
 	public void close() {
+		logger.info("close");
 		bossGroup.shutdownGracefully();
 		workGroup.shutdownGracefully();
 	}
